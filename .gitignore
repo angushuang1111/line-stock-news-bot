@@ -4,3 +4,6 @@ __pycache__/
 stock_bot.db
 *.sqlite3
 .vscode/
+.env
+stock_bot.db
+__pycache__/
