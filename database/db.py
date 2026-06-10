@@ -142,15 +142,20 @@ def init_db() -> None:
             ).close()
 
         # Migration for old SQLite DBs created by the first MVP.
-        # Ignore errors if the columns already exist.
-        for alter in [
-            "ALTER TABLE users ADD COLUMN display_name TEXT",
-            "ALTER TABLE users ADD COLUMN last_seen_at TEXT",
-        ]:
-            try:
-                execute(conn, alter).close()
-            except Exception:
-                pass
+        # PostgreSQL needs IF NOT EXISTS here. Otherwise, a duplicate-column
+        # error aborts the whole transaction and can roll back table creation.
+        if using_postgres():
+            execute(conn, "ALTER TABLE users ADD COLUMN IF NOT EXISTS display_name TEXT").close()
+            execute(conn, "ALTER TABLE users ADD COLUMN IF NOT EXISTS last_seen_at TEXT").close()
+        else:
+            for alter in [
+                "ALTER TABLE users ADD COLUMN display_name TEXT",
+                "ALTER TABLE users ADD COLUMN last_seen_at TEXT",
+            ]:
+                try:
+                    execute(conn, alter).close()
+                except Exception:
+                    pass
 
 
 def add_user(user_id: str, display_name: Optional[str] = None) -> None:
