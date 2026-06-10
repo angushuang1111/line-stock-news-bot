@@ -1,0 +1,6 @@
+.env
+__pycache__/
+*.pyc
+stock_bot.db
+*.sqlite3
+.vscode/
